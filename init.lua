@@ -69,3 +69,6 @@ require('lsp.vim-ls')
 require('lsp.vue-ls')
 require('lsp.yaml-ls')
 require('lsp.elixir-ls')
+
+-- Source vim script
+vim.cmd('source ~/.config/nvim/vimscript/vimrc')
