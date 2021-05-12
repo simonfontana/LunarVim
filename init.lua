@@ -72,3 +72,4 @@ require('lsp.elixir-ls')
 
 -- Source vim script
 vim.cmd('source ~/.config/nvim/vimscript/vimrc')
+vim.cmd('source ~/.config/nvim/vimscript/barbar')
