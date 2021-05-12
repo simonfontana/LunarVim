@@ -3,3 +3,9 @@ set undofile
 set undodir=~/.vim/undo/
 set undolevels=10000
 set history=1000
+
+" Return to last edit position when opening files
+autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal! g`\"" |
+    \ endif
