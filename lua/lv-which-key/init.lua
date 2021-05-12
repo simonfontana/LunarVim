@@ -142,6 +142,17 @@ local mappings = {
         t = {"<cmd>Telescope live_grep<cr>", "Text"}
     },
     S = {name = "+Session", s = {"<cmd>SessionSave<cr>", "Save Session"}, l = {"<cmd>SessionLoad<cr>", "Load Session"}},
+    t = {
+        name = "+Tab",
+        g = {"<cmd>BufferPick<cr>", "Go To"},
+        q = {"<cmd>BufferClose<cr>", "Close"},
+        Q = {"<cmd>BufferClose!<cr>", "Close (Forced)"},
+        n = {"<cmd>tabnew<cr>", "New"},
+        [","] = {"<cmd>BufferPrevious<cr>", "Go To Previous"},
+        ["."] = {"<cmd>BufferNext!<cr>", "Go To Next"},
+        ["<"] = {"<cmd>BufferMovePrevious<cr>", "Move Backwards"},
+        [">"] = {"<cmd>BufferMoveNext!<cr>", "Move Forward"},
+    },
 
     -- extras
     z = {
