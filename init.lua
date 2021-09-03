@@ -19,3 +19,6 @@ local commands = require "lvim.core.commands"
 commands.load(commands.defaults)
 
 require("lvim.lsp").setup()
+
+-- Source vim script
+vim.cmd('source ~/.local/share/lunarvim/lvim/vimscripts/vimrc')
