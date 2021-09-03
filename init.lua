@@ -59,3 +59,6 @@ require("keymappings").setup()
 -- end
 -- if lvim.lang.tailwindcss.active then
 --   require "lsp.tailwind
+
+-- Source vim script
+vim.cmd('source ~/.local/share/lunarvim/lvim/vimscripts/vimrc')
