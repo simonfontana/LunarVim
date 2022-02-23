@@ -89,7 +89,9 @@ styles.lvim = {
       components.lsp,
       components.filetype,
     },
-    lualine_y = {},
+    lualine_y = {
+      components.location,
+    },
     lualine_z = {
       components.scrollbar,
     },
