@@ -2,6 +2,87 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### <!-- 1 --> Features
+
+- _(cmp)_ documentation is deprecated in favor of window.documentation (#2461)
+- _(plugins)_ add support for packer snapshots (#2351)
+- add option to set maximum cmp menu width (#2425)
+
+### <!-- 2 --> Bugfix
+
+- _(impatient)_ avoid get_options in fast handler (#2451)
+- _(installer/pwsh)_ fixes some details on installer and uninstaller (#2404)
+- _(luasnip)_ make sure all snippets are loaded (#2447)
+- _(readme)_ update lsp server ignore syntax
+- _(telescope)_ set <cr> binding to actions.select_default only (#2395)
+- _(theme)_ make sure the new theme is fully loaded (#2392)
+- _(windows)_ specify required powershell version for the installation script (#2376)
+- update deprecated methods in example configuration for trouble.nvim (#2416)
+
+### <!-- 3 --> Refactor
+
+- _(lsp)_ replace deprecated ocamllsp with ocamlls (#2402)
+- _(lsp)_ cleanup servers' override configuration (#2243)
+- re-enable packer.sync() in LvimReload (#2410)
+
+### <!-- 4 --> Documentation
+
+- _(README)_ change forgotten breaking change in example (#2377)
+- _(windows)_ use alpha in config_win.example.lua (#2452)
+
+## [1.1.3]
+
+### <!-- 1 --> Features
+
+- add alpha.nvim integration (#1906)
+
+### <!-- 2 --> Bugfix
+
+- _(alpha)_ globalstatus after openning files from dashboard (#2366)
+- _(bufferline)_ add an additional space before diagnostics (#2367)
+- _(lualine)_ conditional theme loading (#2363)
+- _(peek)_ make sure popup_options are positive (#2373)
+- _(peek)_ print error if lsp is unable to get file contents (#2379)
+- _(terminal)_ whichkey -> which-key (#2380)
+- _(terminal)_ weird lazygit commit message bug (#2382)
+- _(windows)_ use correct validation for the alias (#2371)
+- nvim-tree taking half the window on open (#2357)
+- correct typo in backup function (#2358)
+- automatically set colorscheme (#2370)
+
+### <!-- 3 --> Refactor
+
+- load onedarker theme externally (#2359)
+
+### <!-- 4 --> Documentation
+
+- update demo images on the main readme (#2386)
+
+## [1.1.2]
+
+### <!-- 1 --> Features
+
+- _(installer)_ Use pnpm to install nodejs dependencies(#2279) (#2280)
+- _(windows)_ Add custom config_win.example.lua (#2330)
+- Add option to automatically answer 'yes' for sh install script (#2306)
+- Enable nlsp-settings schemas (#2322)
+
+### <!-- 2 --> Bugfix
+
+- _(nlsp-settings)_ Cross platform issue (#2335)
+- _(timeoutlen)_ This has caused way too many issues in the past (#2287)
+- Disable the default intro message (#2340)
+
+### <!-- 3 --> Refactor
+
+- _(nvim-tree)_ Update settings structure (#2304)
+
+### <!-- 4 --> Documentation
+
+- _(readme)_ Fix typo in example config (#2333)
+
 ## [1.1.1]
 
 ### <!-- 2 --> Bugfix
