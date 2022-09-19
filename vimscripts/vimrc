@@ -6,3 +6,7 @@ autocmd BufReadPost *
 
 " Toggle line numbers with ctrl-n
 nnoremap <C-n> :set relativenumber!<CR>
+
+" When using tabs
+set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:•
+set list
