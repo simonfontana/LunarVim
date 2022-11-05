@@ -11,3 +11,4 @@ nnoremap <C-n> :set relativenumber!<CR>
 set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:•
 set list
 autocmd FileType go set noexpandtab
+autocmd FileType go set shiftwidth=4
