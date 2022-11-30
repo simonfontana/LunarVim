@@ -17,6 +17,9 @@ local core_plugins = {
   {
     "folke/tokyonight.nvim",
   },
+  {
+    "lunarvim/lunar.nvim",
+  },
   { "Tastyep/structlog.nvim" },
 
   { "nvim-lua/popup.nvim" },
@@ -277,6 +280,16 @@ local core_plugins = {
       end)
     end,
     disable = lvim.colorscheme ~= "onedarker",
+  },
+
+  {
+    "lunarvim/bigfile.nvim",
+    config = function()
+      pcall(function()
+        require("bigfile").config(lvim.builtin.bigfile.config)
+      end)
+    end,
+    disable = not lvim.builtin.bigfile.active,
   },
 }
 

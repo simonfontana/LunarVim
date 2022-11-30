@@ -147,13 +147,11 @@ function M.setup()
     return
   end
 
-
   if lvim.builtin.nvimtree._setup_called then
     Log:debug "ignoring repeated setup call for nvim-tree, see kyazdani42/nvim-tree.lua#1308"
     return
   end
 
-  lvim.builtin.which_key.mappings["e"] = { "<cmd>NvimTreeToggle<CR>", "Explorer" }
   lvim.builtin.nvimtree._setup_called = true
 
   -- Implicitly update nvim-tree when project module is active

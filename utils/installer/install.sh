@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+OS="$(uname -s)"
+
 #Set branch to master unless specified by the user
 declare -x LV_BRANCH="${LV_BRANCH:-"master"}"
 declare -xr LV_REMOTE="${LV_REMOTE:-simonfontana/LunarVim.git}"
@@ -32,6 +34,7 @@ declare -a __lvim_dirs=(
   "$LUNARVIM_CONFIG_DIR"
   "$LUNARVIM_RUNTIME_DIR"
   "$LUNARVIM_CACHE_DIR"
+  "$LUNARVIM_BASE_DIR"
 )
 
 declare -a __npm_deps=(
@@ -41,6 +44,11 @@ declare -a __npm_deps=(
 
 declare -a __pip_deps=(
   "pynvim"
+)
+
+declare -a __rust_deps=(
+  "fd::fd-find"
+  "rg::ripgrep"
 )
 
 function usage() {
@@ -107,6 +115,10 @@ function confirm() {
   done
 }
 
+function stringify_array() {
+  echo -n "${@}" | sed 's/ /, /'
+}
+
 function main() {
   parse_arguments "$@"
 
@@ -119,13 +131,13 @@ function main() {
 
   if [ "$ARGS_INSTALL_DEPENDENCIES" -eq 1 ]; then
     if [ "$INTERACTIVE_MODE" -eq 1 ]; then
-      if confirm "Would you like to install LunarVim's NodeJS dependencies?"; then
+      if confirm "Would you like to install LunarVim's NodeJS dependencies: $(stringify_array ${__npm_deps[@]})?"; then
         install_nodejs_deps
       fi
-      if confirm "Would you like to install LunarVim's Python dependencies?"; then
+      if confirm "Would you like to install LunarVim's Python dependencies: $(stringify_array ${__pip_deps[@]})?"; then
         install_python_deps
       fi
-      if confirm "Would you like to install LunarVim's Rust dependencies?"; then
+      if confirm "Would you like to install LunarVim's Rust dependencies: $(stringify_array ${__rust_deps[@]})?"; then
         install_rust_deps
       fi
     else
@@ -135,14 +147,12 @@ function main() {
     fi
   fi
 
-  backup_old_config
+  remove_old_cache_files
 
   verify_lvim_dirs
 
   if [ "$ARGS_LOCAL" -eq 1 ]; then
     link_local_lvim
-  elif [ -d "$LUNARVIM_BASE_DIR" ]; then
-    validate_lunarvim_files
   else
     clone_lvim
   fi
@@ -156,7 +166,6 @@ function main() {
 }
 
 function detect_platform() {
-  OS="$(uname -s)"
   case "$OS" in
     Linux)
       if [ -f "/etc/arch-release" ] || [ -f "/etc/artix-release" ]; then
@@ -217,15 +226,6 @@ function verify_core_plugins() {
     exit 1
   fi
   echo "Verification complete!"
-}
-
-function validate_lunarvim_files() {
-  local verify_version_cmd='if v:errmsg != "" | cquit | else | quit | endif'
-  if ! "$INSTALL_PREFIX/bin/lvim" --headless -c 'LvimUpdate' -c "$verify_version_cmd" &>/dev/null; then
-    msg "Removing old installation files"
-    rm -rf "$LUNARVIM_BASE_DIR"
-    clone_lvim
-  fi
 }
 
 function validate_install_prefix() {
@@ -344,8 +344,7 @@ function __attempt_to_install_with_cargo() {
 
 # we try to install the missing one with cargo even though it's unlikely to be found
 function install_rust_deps() {
-  local -a deps=("fd::fd-find" "rg::ripgrep")
-  for dep in "${deps[@]}"; do
+  for dep in "${__rust_deps[@]}"; do
     if ! command -v "${dep%%::*}" &>/dev/null; then
       __attempt_to_install_with_cargo "${dep##*::}"
     fi
@@ -353,43 +352,37 @@ function install_rust_deps() {
   echo "All Rust dependencies are successfully installed"
 }
 
-function verify_lvim_dirs() {
-  if [ "$ARGS_OVERWRITE" -eq 1 ]; then
-    for dir in "${__lvim_dirs[@]}"; do
-      [ -d "$dir" ] && rm -rf "$dir"
-    done
-  fi
-
-  for dir in "${__lvim_dirs[@]}"; do
-    mkdir -p "$dir"
-  done
-}
-
-function backup_old_config() {
-  local src="$LUNARVIM_CONFIG_DIR"
+function __backup_dir() {
+  local src="$1"
   if [ ! -d "$src" ]; then
     return
   fi
   mkdir -p "$src.old"
-  touch "$src/ignore"
   msg "Backing up old $src to $src.old"
   if command -v rsync &>/dev/null; then
-    rsync --archive -hh --stats --partial --copy-links --cvs-exclude "$src"/ "$src.old"
+    rsync --archive --quiet --backup --partial --copy-links --cvs-exclude "$src"/ "$src.old"
   else
-    OS="$(uname -s)"
     case "$OS" in
-      Linux | *BSD)
-        cp -r "$src/"* "$src.old/."
-        ;;
       Darwin)
         cp -R "$src/"* "$src.old/."
         ;;
       *)
-        echo "OS $OS is not currently supported."
+        cp -r "$src/"* "$src.old/."
         ;;
     esac
   fi
-  msg "Backup operation complete"
+}
+
+function verify_lvim_dirs() {
+  for dir in "${__lvim_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+      if [ "$ARGS_OVERWRITE" -eq 0 ]; then
+        __backup_dir "$dir"
+      fi
+      rm -rf "$dir"
+    fi
+    mkdir -p "$dir"
+  done
 }
 
 function clone_lvim() {
@@ -406,8 +399,8 @@ function link_local_lvim() {
 
   # Detect whether it's a symlink or a folder
   if [ -d "$LUNARVIM_BASE_DIR" ]; then
-    echo "Removing old installation files"
-    rm -rf "$LUNARVIM_BASE_DIR"
+    msg "Moving old files to ${LUNARVIM_BASE_DIR}.old"
+    mv "$LUNARVIM_BASE_DIR" "${LUNARVIM_BASE_DIR}".old
   fi
 
   echo "   - $BASEDIR -> $LUNARVIM_BASE_DIR"
@@ -433,8 +426,6 @@ function remove_old_cache_files() {
 
 function setup_lvim() {
 
-  remove_old_cache_files
-
   msg "Installing LunarVim shim"
 
   setup_shim
@@ -456,7 +447,6 @@ function setup_lvim() {
 }
 
 function create_desktop_file() {
-  OS="$(uname -s)"
   # TODO: Any other OSes that use desktop files?
   ([ "$OS" != "Linux" ] || ! command -v xdg-desktop-menu &>/dev/null) && return
   echo "Creating desktop file"

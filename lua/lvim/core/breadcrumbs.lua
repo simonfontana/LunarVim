@@ -28,8 +28,8 @@ M.config = function()
       "dap-repl",
       "dap-terminal",
       "dapui_console",
+      "dapui_hover",
       "lab",
-      "Markdown",
       "notify",
       "noice",
       "",
@@ -72,7 +72,7 @@ M.config = function()
         Variable = icons.Variable .. " ",
       },
       highlight = true,
-      separator = " " .. ">" .. " ",
+      separator = " " .. lvim.icons.ui.ChevronRight .. " ",
       depth_limit = 0,
       depth_limit_indicator = "..",
     },
@@ -99,12 +99,8 @@ M.get_filename = function()
   local f = require "lvim.utils.functions"
 
   if not f.isempty(filename) then
-    local file_icon, file_icon_color =
-      require("nvim-web-devicons").get_icon_color(filename, extension, { default = true })
+    local file_icon, hl_group = require("nvim-web-devicons").get_icon(filename, extension, { default = true })
 
-    local hl_group = "FileIconColor" .. extension
-
-    vim.api.nvim_set_hl(0, hl_group, { fg = file_icon_color })
     if f.isempty(file_icon) then
       file_icon = lvim.icons.kind.File
     end
@@ -154,8 +150,7 @@ local get_gps = function()
   end
 
   if not require("lvim.utils.functions").isempty(gps_location) then
-    -- TODO: replace with chevron
-    return ">" .. " " .. gps_location
+    return "%#NavicSeparator#" .. lvim.icons.ui.ChevronRight .. "%* " .. gps_location
   else
     return ""
   end
@@ -208,14 +203,16 @@ M.create_winbar = function()
   vim.api.nvim_create_augroup("_winbar", {})
   if vim.fn.has "nvim-0.8" == 1 then
     vim.api.nvim_create_autocmd(
-      { "CursorMoved", "CursorHold", "BufWinEnter", "BufFilePost", "InsertEnter", "BufWritePost", "TabClosed" },
+      { "CursorHoldI", "CursorHold", "BufWinEnter", "BufFilePost", "InsertEnter", "BufWritePost", "TabClosed" },
       {
         group = "_winbar",
         callback = function()
-          local status_ok, _ = pcall(vim.api.nvim_buf_get_var, 0, "lsp_floating_window")
-          if not status_ok then
-            -- TODO:
-            require("lvim.core.breadcrumbs").get_winbar()
+          if lvim.builtin.breadcrumbs.active then
+            local status_ok, _ = pcall(vim.api.nvim_buf_get_var, 0, "lsp_floating_window")
+            if not status_ok then
+              -- TODO:
+              require("lvim.core.breadcrumbs").get_winbar()
+            end
           end
         end,
       }
