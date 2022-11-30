@@ -44,21 +44,6 @@ local skipped_filetypes = { "markdown", "rst", "plaintext", "toml", "proto" }
 
 local join_paths = require("lvim.utils").join_paths
 
--- Python formatters
-local formatters = require "lvim.lsp.null-ls.formatters"
-formatters.setup {
-  { command = "isort", filetypes = { "python" } },
-  { command = "black", filetypes = { "python" } },
-}
-
--- Python linters
-local linters = require "lvim.lsp.null-ls.linters"
-linters.setup {
-  { command = "flake8", filetypes = { "python" } },
-  { command = "mypy", filetypes = { "python" } },
-  { command = "pylint", filetypes = { "python" } },
-}
-
 return {
   templates_dir = join_paths(get_runtime_dir(), "site", "after", "ftplugin"),
   diagnostics = {
