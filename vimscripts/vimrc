@@ -12,3 +12,4 @@ set listchars=tab:»\ ,extends:›,precedes:‹,nbsp:·,trail:•
 set list
 autocmd FileType go set noexpandtab
 autocmd FileType go set shiftwidth=4
+autocmd FileType go set tabstop=4
