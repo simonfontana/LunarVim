@@ -6,6 +6,7 @@ local default_workspace = {
     "${3rd}/busted/library",
     "${3rd}/luassert/library",
   },
+  checkThirdParty = false,
 
   maxPreload = 5000,
   preloadFileSize = 10000,

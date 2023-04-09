@@ -331,6 +331,7 @@ M.config = function()
             return -- success, exit early
           end
         end
+
         fallback() -- if not exited early, always fallback
       end),
     },
