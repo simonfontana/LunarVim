@@ -291,6 +291,11 @@ local core_plugins = {
     end,
     disable = not lvim.builtin.bigfile.active,
   },
+
+  -- My custom plugins
+  {
+    "dhruvasagar/vim-table-mode"
+  },
 }
 
 local default_snapshot_path = join_paths(get_lvim_base_dir(), "snapshots", "default.json")
