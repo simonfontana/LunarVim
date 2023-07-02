@@ -1,5 +1,5 @@
 name: General Issue
-description: File a bug report not related to LSP (language support, diagnostics)
+description: File a bug report not related to LSP (intellisense, completion, diagnostics, etc)
 labels: [bug]
 
 body:
@@ -38,6 +38,15 @@ body:
       description: "Output of `nvim --version`"
       placeholder: |
         NVIM v0.8.0-dev+199-g2875d45e7
+    validations:
+      required: true
+  - type: input
+    id: terminal-name
+    attributes:
+      label: Terminal name
+      description: "Name of terminal you are using"
+      placeholder: |
+        iTerm2, Wezterm,...
     validations:
       required: true
   - type: input

@@ -12,10 +12,12 @@ declare -xr XDG_DATA_HOME="${XDG_DATA_HOME:-"$HOME/.local/share"}"
 declare -xr XDG_CACHE_HOME="${XDG_CACHE_HOME:-"$HOME/.cache"}"
 declare -xr XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"$HOME/.config"}"
 
+declare -xr NVIM_APPNAME="${NVIM_APPNAME:-"lvim"}"
+
 declare -xr LUNARVIM_RUNTIME_DIR="${LUNARVIM_RUNTIME_DIR:-"$XDG_DATA_HOME/lunarvim"}"
-declare -xr LUNARVIM_CONFIG_DIR="${LUNARVIM_CONFIG_DIR:-"$XDG_CONFIG_HOME/lvim"}"
-declare -xr LUNARVIM_CACHE_DIR="${LUNARVIM_CACHE_DIR:-"$XDG_CACHE_HOME/lvim"}"
-declare -xr LUNARVIM_BASE_DIR="${LUNARVIM_BASE_DIR:-"$LUNARVIM_RUNTIME_DIR/lvim"}"
+declare -xr LUNARVIM_CONFIG_DIR="${LUNARVIM_CONFIG_DIR:-"$XDG_CONFIG_HOME/$NVIM_APPNAME"}"
+declare -xr LUNARVIM_CACHE_DIR="${LUNARVIM_CACHE_DIR:-"$XDG_CACHE_HOME/$NVIM_APPNAME"}"
+declare -xr LUNARVIM_BASE_DIR="${LUNARVIM_BASE_DIR:-"$LUNARVIM_RUNTIME_DIR/$NVIM_APPNAME"}"
 
 declare -xr LUNARVIM_LOG_LEVEL="${LUNARVIM_LOG_LEVEL:-warn}"
 
@@ -39,8 +41,11 @@ declare -a __lvim_dirs=(
 
 declare -a __npm_deps=(
   "neovim"
-  "tree-sitter-cli"
 )
+# treesitter installed with brew causes conflicts #3738
+if ! command -v tree-sitter &>/dev/null; then
+  __npm_deps+=("tree-sitter-cli")
+fi
 
 declare -a __pip_deps=(
   "pynvim"
@@ -161,7 +166,7 @@ function main() {
 
   msg "$ADDITIONAL_WARNINGS"
   msg "Thank you for installing LunarVim!!"
-  echo "You can start it by running: $INSTALL_PREFIX/bin/lvim"
+  echo "You can start it by running: $INSTALL_PREFIX/bin/$NVIM_APPNAME"
   echo "Do not forget to use a font with glyphs (icons) support [https://github.com/ryanoasis/nerd-fonts]"
 }
 
@@ -222,7 +227,7 @@ function check_neovim_min_version() {
 function verify_core_plugins() {
   msg "Verifying core plugins"
   if ! bash "$LUNARVIM_BASE_DIR/utils/ci/verify_plugins.sh"; then
-    echo "[ERROR]: Unable to verify plugins, make sure to manually run ':PackerSync' when starting lvim for the first time."
+    echo "[ERROR]: Unable to verify plugins, make sure to manually run ':Lazy sync' when starting lvim for the first time."
     exit 1
   fi
   echo "Verification complete!"
@@ -364,10 +369,10 @@ function __backup_dir() {
   else
     case "$OS" in
       Darwin)
-        cp -R "$src/"* "$src.old/."
+        cp -R "$src/." "$src.old/."
         ;;
       *)
-        cp -r "$src/"* "$src.old/."
+        cp -r "$src/." "$src.old/."
         ;;
     esac
   fi
@@ -412,15 +417,10 @@ function setup_shim() {
 }
 
 function remove_old_cache_files() {
-  local packer_cache="$LUNARVIM_CONFIG_DIR/plugin/packer_compiled.lua"
-  if [ -e "$packer_cache" ]; then
-    msg "Removing old packer cache file"
-    rm -f "$packer_cache"
-  fi
-
-  if [ -e "$LUNARVIM_CACHE_DIR/luacache" ] || [ -e "$LUNARVIM_CACHE_DIR/lvim_cache" ]; then
-    msg "Removing old startup cache file"
-    rm -f "$LUNARVIM_CACHE_DIR/{luacache,lvim_cache}"
+  local lazy_cache="$LUNARVIM_CACHE_DIR/lazy/cache"
+  if [ -e "$lazy_cache" ]; then
+    msg "Removing old lazy cache file"
+    rm -f "$lazy_cache"
   fi
 }
 
@@ -435,13 +435,11 @@ function setup_lvim() {
   [ ! -f "$LUNARVIM_CONFIG_DIR/config.lua" ] \
     && cp "$LUNARVIM_BASE_DIR/utils/installer/config.example.lua" "$LUNARVIM_CONFIG_DIR/config.lua"
 
-  echo "Preparing Packer setup"
+  echo "Preparing Lazy setup"
 
-  "$INSTALL_PREFIX/bin/lvim" --headless \
-    -c 'autocmd User PackerComplete quitall' \
-    -c 'PackerSync'
+  "$INSTALL_PREFIX/bin/$NVIM_APPNAME" --headless -c 'quitall'
 
-  echo "Packer setup complete"
+  echo "Lazy setup complete"
 
   verify_core_plugins
 }
@@ -457,7 +455,7 @@ function create_desktop_file() {
     cp "$LUNARVIM_BASE_DIR/utils/desktop/$size_folder/lvim.svg" "$XDG_DATA_HOME/icons/hicolor/$size_folder/apps"
   done
 
-  xdg-desktop-menu install --novendor "$LUNARVIM_BASE_DIR/utils/desktop/lvim.desktop"
+  xdg-desktop-menu install --novendor "$LUNARVIM_BASE_DIR/utils/desktop/lvim.desktop" || true
 }
 
 function print_logo() {
